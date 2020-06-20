@@ -38,6 +38,13 @@ type Table struct {
 	PrimaryKeys     []int
 }
 
+// Cluster defines a subgraph to cluster tables
+type Cluster struct {
+	ClusterAttributes map[string]string
+	Tables            []*Table
+	Relations         []*Relation
+}
+
 // Title ...
 type Title struct {
 	Title           string
@@ -46,25 +53,54 @@ type Title struct {
 
 // Erd of the database
 type Erd struct {
-	Title            Title
-	Tables           map[string]*Table
-	Relations        []Relation
-	CurrentRelation  Relation
-	key              string
-	value            string
-	CurrentTableName string
-	IsError          bool
-	line             int
+	Title           Title
+	Tables          map[string]*Table
+	Clusters        []*Cluster
+	CurrentCluster  *Cluster
+	CurrentTable    *Table
+	Relations       []*Relation
+	CurrentRelation *Relation
+	key             string
+	value           string
+	IsError         bool
+	line            int
 }
 
 func (e *Erd) addTableTitle(t string) {
 	t = strings.Trim(t, "\"")
-	e.Tables[e.CurrentTableName].Title = t
+	e.CurrentTable.Title = t
 }
 
 // ClearTableAndColumn clears the current table
 func (e *Erd) ClearTableAndColumn() {
-	e.CurrentTableName = ""
+	e.CurrentTable = nil
+}
+
+// AddCluster starts a new cluster
+func (e *Erd) AddCluster() {
+	newCluster := &Cluster{
+		Tables:            make([]*Table, 0),
+		Relations:         make([]*Relation, 0),
+		ClusterAttributes: make(map[string]string),
+	}
+	if e.Clusters == nil {
+		e.Clusters = make([]*Cluster, 0)
+	}
+
+	e.Clusters = append(e.Clusters, newCluster)
+	e.CurrentCluster = newCluster
+}
+
+// ClearCluster ends the current cluster
+func (e *Erd) ClearCluster() {
+	e.CurrentCluster = nil
+}
+
+// AddClusterKeyValue adds the key value pair to cluster attributes
+func (e *Erd) AddClusterKeyValue() {
+	if e.CurrentCluster != nil {
+		e.CurrentCluster.ClusterAttributes[e.key] = e.value
+	}
 }
 
 // AddTitleKeyValue adds the key value pair to the title attributes
@@ -80,34 +116,43 @@ func (e *Erd) AddTable(text string) {
 	if e.Tables == nil {
 		e.Tables = map[string]*Table{}
 	}
-	e.Tables[text] = &Table{Title: text, TableAttributes: map[string]string{}}
-	e.CurrentTableName = text
+
+	e.CurrentTable = &Table{Title: text, TableAttributes: map[string]string{}}
+
+	if e.CurrentCluster != nil {
+		e.CurrentCluster.Tables = append(e.CurrentCluster.Tables, e.CurrentTable)
+	} else {
+		e.Tables[text] = e.CurrentTable
+	}
 }
 
 // AddTableKeyValue add a key value pair to the table attributes
 func (e *Erd) AddTableKeyValue() {
-	table := e.Tables[e.CurrentTableName]
-	if table.TableAttributes == nil {
-		table.TableAttributes = map[string]string{}
+	if e.CurrentTable == nil {
+		e.Error(errors.New("Invalid State"))
 	}
-	table.TableAttributes[e.key] = e.value
+	if e.CurrentTable.TableAttributes == nil {
+		e.CurrentTable.TableAttributes = map[string]string{}
+	}
+	e.CurrentTable.TableAttributes[e.key] = e.value
 }
 
 // AddColumn adds a column to the EDR
 func (e *Erd) AddColumn(text string) {
-	if e.CurrentTableName == "" {
+	if e.CurrentTable == nil {
 		e.Error(errors.New("Invalid State"))
 	}
 
-	table := e.Tables[e.CurrentTableName]
-	table.Columns = append(table.Columns, Column{Title: text, ColumnAttributes: map[string]string{}})
-	table.CurrentColumnID = len(table.Columns) - 1
+	e.CurrentTable.Columns = append(e.CurrentTable.Columns, Column{Title: text, ColumnAttributes: map[string]string{}})
+	e.CurrentTable.CurrentColumnID = len(e.CurrentTable.Columns) - 1
 }
 
 // AddColumnKeyValue adds a key value pair to the column attributes
 func (e *Erd) AddColumnKeyValue() {
-	table := e.Tables[e.CurrentTableName]
-	column := table.Columns[table.CurrentColumnID]
+	if e.CurrentTable == nil {
+		e.Error(errors.New("Invalid State"))
+	}
+	column := e.CurrentTable.Columns[e.CurrentTable.CurrentColumnID]
 	if column.ColumnAttributes == nil {
 		column.ColumnAttributes = map[string]string{}
 	}
@@ -134,12 +179,21 @@ func (e *Erd) SetValue(text string) {
 
 // AddRelation adds the current relation to the EDR
 func (e *Erd) AddRelation() {
-	e.Relations = append(e.Relations, e.CurrentRelation)
-	e.CurrentRelation = Relation{}
+	if e.CurrentRelation == nil {
+		e.Error(errors.New("Invalid relation state"))
+	}
+	if e.CurrentCluster != nil {
+		e.CurrentCluster.Relations = append(e.CurrentCluster.Relations, e.CurrentRelation)
+	} else {
+		e.Relations = append(e.Relations, e.CurrentRelation)
+	}
 }
 
 // AddRelationKeyValue adds a key value pair to the current relation attributes
 func (e *Erd) AddRelationKeyValue() {
+	if e.CurrentRelation == nil {
+		e.Error(errors.New("Invalid relation state"))
+	}
 	if e.CurrentRelation.RelationAttributes == nil {
 		e.CurrentRelation.RelationAttributes = map[string]string{}
 	}
@@ -148,21 +202,30 @@ func (e *Erd) AddRelationKeyValue() {
 
 // SetRelationLeft sets the left side of the current relation
 func (e *Erd) SetRelationLeft(text string) {
-	e.CurrentRelation.LeftTableName = text
+	e.CurrentRelation = &Relation{LeftTableName: text}
 }
 
 // SetCardinalityLeft sets the left cardinality of the current relation
 func (e *Erd) SetCardinalityLeft(text string) {
+	if e.CurrentRelation == nil {
+		e.Error(errors.New("Invalid relation state"))
+	}
 	e.CurrentRelation.LeftCardinality = text
 }
 
 // SetRelationRight sets the right side of the current relation
 func (e *Erd) SetRelationRight(text string) {
+	if e.CurrentRelation == nil {
+		e.Error(errors.New("Invalid relation state"))
+	}
 	e.CurrentRelation.RightTableName = text
 }
 
 // SetCardinalityRight sets the right cardinality of the current relation
 func (e *Erd) SetCardinalityRight(text string) {
+	if e.CurrentRelation == nil {
+		e.Error(errors.New("Invalid relation state"))
+	}
 	e.CurrentRelation.RightCardinality = text
 }
 

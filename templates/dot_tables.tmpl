@@ -1,5 +1,10 @@
 {{define "dot_tables"}}
 {{range $tk, $t := .Tables}}
+  {{template "dot_table" .}}
+{{- end -}}
+{{- end -}}
+
+{{define "dot_table"}}
   {{.Title}} [label=<<TABLE
       BORDER="0"
       CELLPADDING="0"
@@ -35,5 +40,4 @@
     style=filled
     {{- end -}}
     ];
-{{- end -}}
 {{- end -}}

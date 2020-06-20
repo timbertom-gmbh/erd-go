@@ -62,7 +62,7 @@ see [examples directory](https://github.com/kaishuu0123/erd-go/blob/master/examp
     ```
 1. install go-bindata
     ```
-    go get github.com/jteeuwen/go-bindata
+    go get github.com/go-bindata/go-bindata
     ```
 1. install peg
     ```

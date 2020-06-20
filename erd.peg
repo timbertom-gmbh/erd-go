@@ -10,10 +10,14 @@ root <- expression EOT /
 EOT <- !.
 
 expression <-
-    (title_info / relation_info / table_info / comment_line / empty_line)*
+    (title_info / relation_info / table_info / comment_line / empty_line / cluster_info / cluster_end )*
 
 empty_line <- ws { p.ClearTableAndColumn() } 
 comment_line <- space* '#' comment_string newline
+
+cluster_info <- cluster_start ws* '{' ws* (cluster_attribute ws* attribute_sep? ws*)* ws* '}' newline 
+cluster_end <- 'cluster_end' newline_or_eot { p.ClearCluster() }
+cluster_start <- 'cluster' { p.AddCluster() }
 
 title_info <- 'title' ws* '{' ws* (title_attribute ws* attribute_sep? ws*)* ws* '}' newline
 
@@ -38,6 +42,8 @@ relation_right <-
 cardinality_right <-
     <cardinality> { p.SetCardinalityRight(text)}
 
+cluster_attribute <-
+    attribute_key space* ':' space* attribute_value { p.AddClusterKeyValue() }
 title_attribute <-
     attribute_key space* ':' space* attribute_value { p.AddTitleKeyValue() }
 table_attribute <-
