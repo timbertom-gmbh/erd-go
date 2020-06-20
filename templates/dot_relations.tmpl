@@ -8,6 +8,9 @@
     {{- else -}}
     arrowhead=noneotee,headlabel=<<FONT>{{.RightCardinality}}</FONT>>,
     {{- end -}}
+    {{- if .RelationAttributes.len -}}
+    len={{.RelationAttributes.len}},
+    {{- end -}}
     {{- if .RelationAttributes.label -}}
     label=<<FONT>{{.RelationAttributes.label}}</FONT>>,
     {{- end -}}

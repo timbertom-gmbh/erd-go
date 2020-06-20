@@ -1,10 +1,15 @@
 {{define "dot_subgraphs"}}
 {{range $tk, $t := .Clusters}}
   subgraph cluster_{{$tk}} {
+    K=10;
     {{if .ClusterAttributes.label}}label = "{{.ClusterAttributes.label}}";{{end}}
     {{if .ClusterAttributes.bgcolor}}style=filled;
     color="{{.ClusterAttributes.bgcolor}}";{{end}}
     
+    edge [
+      minlen=2;
+    ]
+
     {{template "dot_tables" .}}
 
     {{template "dot_relations" .}}
