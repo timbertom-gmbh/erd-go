@@ -12,7 +12,7 @@
     len={{.RelationAttributes.len}},
     {{- end -}}
     {{- if .RelationAttributes.label -}}
-    label=<<FONT>{{.RelationAttributes.label}}</FONT>>,
+    xlabel=<<FONT>{{.RelationAttributes.label}}</FONT>>,
     {{- end -}}
     {{- if (eq .LeftCardinality "*") -}}
     arrowtail=ocrow,taillabel=<<FONT>0..N</FONT>>

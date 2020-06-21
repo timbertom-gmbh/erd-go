@@ -5,10 +5,15 @@
     {{if .ClusterAttributes.label}}label = "{{.ClusterAttributes.label}}";{{end}}
     {{if .ClusterAttributes.bgcolor}}style=filled;
     color="{{.ClusterAttributes.bgcolor}}";{{end}}
+    style=invis;
     
+    node [
+      nodesep=1
+    ];
+
     edge [
-      minlen=2;
-    ]
+      minlen=2
+    ];
 
     {{template "dot_tables" .}}
 
