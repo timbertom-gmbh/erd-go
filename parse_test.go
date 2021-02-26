@@ -46,7 +46,8 @@ Person *--1 Location
 	dot, _ := Asset("templates/dot.tmpl")
 	tables, _ := Asset("templates/dot_tables.tmpl")
 	relations, _ := Asset("templates/dot_relations.tmpl")
-	templates := template.Must(template.New("").Parse(string(dot) + string(tables) + string(relations)))
+	clusters, _ := Asset("templates/dot_subgraphs.tmpl")
+	templates := template.Must(template.New("").Parse(string(dot) + string(tables) + string(relations) + string(clusters)))
 
 	fd := bytes.NewBufferString("")
 	if err := templates.ExecuteTemplate(fd, "dot", parser.Erd); err != nil {
