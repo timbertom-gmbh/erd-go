@@ -25,6 +25,9 @@
     {{- else -}}
     arrowtail=noneotee,taillabel=<<FONT>{{.LeftCardinality}}</FONT>>
     {{- end -}}
+    {{- if and (eq .LeftCardinality "-") (eq .RightCardinality "-") -}}
+    style=dashed,
+    {{- end -}}
   ];
 {{- end -}}
 {{- end -}}
