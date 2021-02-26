@@ -2411,7 +2411,7 @@ func (p *Parser) Init(options ...func(*Parser) error) error {
 			position, tokenIndex = position266, tokenIndex266
 			return false
 		},
-		/* 35 cardinality <- <('0' / '1' / '*' / '+')> */
+		/* 35 cardinality <- <('0' / '1' / '*' / '+' / '-')> */
 		func() bool {
 			position280, tokenIndex280 := position, tokenIndex
 			{
@@ -2440,6 +2440,13 @@ func (p *Parser) Init(options ...func(*Parser) error) error {
 				l285:
 					position, tokenIndex = position282, tokenIndex282
 					if buffer[position] != rune('+') {
+						goto l286
+					}
+					position++
+					goto l282
+				l286:
+					position, tokenIndex = position282, tokenIndex282
+					if buffer[position] != rune('-') {
 						goto l280
 					}
 					position++

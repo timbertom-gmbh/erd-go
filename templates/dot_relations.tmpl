@@ -5,7 +5,7 @@
     arrowhead=ocrow,headlabel=<<FONT>0..N</FONT>>,
     {{- else if (eq .RightCardinality "+")}}
     arrowhead=ocrowtee,headlabel=<<FONT>1..N</FONT>>,
-    {{- else if (eq .RightCardinality "#")}}
+    {{- else if (eq .RightCardinality "-")}}
     arrowhead=noneotee,
     {{- else -}}
     arrowhead=noneotee,headlabel=<<FONT>{{.RightCardinality}}</FONT>>,
@@ -20,7 +20,7 @@
     arrowtail=ocrow,taillabel=<<FONT>0..N</FONT>>
     {{- else if (eq .LeftCardinality "+")}}
     arrowtail=ocrowtee,taillabel=<<FONT>1..N</FONT>>
-    {{- else if (eq .LeftCardinality "#")}}
+    {{- else if (eq .LeftCardinality "-")}}
     arrowhead=noneotee,
     {{- else -}}
     arrowtail=noneotee,taillabel=<<FONT>{{.LeftCardinality}}</FONT>>
