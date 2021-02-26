@@ -21,7 +21,7 @@
     {{- else if (eq .LeftCardinality "+")}}
     arrowtail=ocrowtee,taillabel=<<FONT>1..N</FONT>>
     {{- else if (eq .LeftCardinality "-")}}
-    arrowhead=none,
+    arrowtail=none,
     {{- else -}}
     arrowtail=noneotee,taillabel=<<FONT>{{.LeftCardinality}}</FONT>>
     {{- end -}}
